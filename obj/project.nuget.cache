@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "j574XRLy3vCKvyZscJR67eFj2Q2l1PDpIOHmX6z+nTy17xZwJ7+SK9+3F69xpYOMgxk40e0Yp6shF0FObkdPVg==",
+  "dgSpecHash": "a697DmsV7hsNE3hyGPEs0y5aT6usURg/NYoFJyWXGnuwXHgGBxFMp+oyjJzb5chxKeMMmwPEODaeqiHeRywikw==",
   "success": true,
-  "projectFilePath": "D:\\Documents\\3 курс\\УПП\\TeamProject\\TeamProject.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\ГРЯЗНАЯ ПИСЬКА\\source\\repos\\TeamProject\\TeamProject.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ГРЯЗНАЯ ПИСЬКА\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.29\\microsoft.windowsdesktop.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\ГРЯЗНАЯ ПИСЬКА\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.29\\microsoft.netcore.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\ГРЯЗНАЯ ПИСЬКА\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.29\\microsoft.aspnetcore.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\ГРЯЗНАЯ ПИСЬКА\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.29\\microsoft.netcore.app.host.win-x64.6.0.29.nupkg.sha512"
+  ],
   "logs": []
 }
