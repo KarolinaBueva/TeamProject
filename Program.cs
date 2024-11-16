@@ -5,35 +5,26 @@
     {
         private string name;
         private Frequency frequency;
-        private DateTime data;
+        private DateTime date;
         private int TirazhNum;
-        //private Article[];
+        private Article[] articles;
 
-        public Magazine(string name, Frequency frequency, DateTime data, int TirazhNum)
+        public Magazine(string name, Frequency frequency, DateTime date, int TirazhNum)
         {
             this.name = name;
             this.frequency = frequency;
-            this.data = data;
+            this.date = date;
             this.TirazhNum = TirazhNum;
-        }
-        public Magazine() { }
-
-        public string Name
-        {
-            get => name;
-            set
-            {
-                name= value;
-            }
+            articles = new Article[0];
         }
 
-        public Frequency Freq
+        public Magazine()
         {
-            get => frequency;
-            set
-            {
-                frequency = value;
-            }
+            name = "Magazine";
+            frequency = Frequency.Monthly;
+            date = DateTime.Now;
+            TirazhNum = 1000;
+            articles = new Article[0];
         }
 
         public string Name
@@ -45,5 +36,66 @@
             }
         }
 
+        public Frequency Frequency
+        {
+            get => frequency;
+            set
+            {
+                frequency = value;
+            }
+        }
+
+        public DateTime Date
+        {
+            get => date;
+            set
+            {
+                date = value;
+            }
+        }
+
+        public int Num
+        {
+            get => TirazhNum;
+            set
+            {
+                TirazhNum = value;
+            }
+        }
+
+        public Article[] Articles
+        {
+            get => articles;
+            set
+            {
+                articles = value;
+            }
+        }
+
+        public double AverageRating
+        {
+            get => articles.Length == 0 ? 0.0 : articles.Average(article => article.Rating);
+        }
+
+        public bool this[Frequency frequency]
+        {
+            get => frequency == frequency;
+        }
+
+        public void AddArticles(params Article[] articles)
+        {
+            articles = articles.Concat(articles).ToArray();
+        }
+
+        public override string ToString()
+        {
+            return $"Название-{name}, периодичность выхода журнала-{frequency}, дата выхода-{date}, номер тиража-{TirazhNum}, список статей-{articles}";
+        }
+
+        public virtual string ToShortString()
+        {
+            return $"Название-{name}, периодичность выхода журнала-{frequency}, дата выхода-{date}, номер тиража-{TirazhNum}, значение среднего рейтинга статей-{articles.Average()}";
+        }
     }
+
 }
