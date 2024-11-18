@@ -97,5 +97,82 @@
             return $"Название-{name}, периодичность выхода журнала-{frequency}, дата выхода-{date}, номер тиража-{TirazhNum}, значение среднего рейтинга статей-{articles.Average()}";
         }
     }
+    public class Person
+    {
+        private string firstName;
+        private string lastName;
+        private DateTime birthDate;
 
+        public Person(string firstName, string lastName, DateTime birthDate)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            BirthDate = birthDate;
+        }
+
+        public Person() : this("Имя ", "Фамилия ", DateTime.Now)
+        {
+        }
+
+        public string FirstName
+        {
+            get { return firstName; }
+            set { firstName = value; }
+        }
+
+        public string LastName
+        {
+            get { return lastName; }
+            set { lastName = value; }
+        }
+
+        public DateTime BirthDate
+        {
+            get { return birthDate; }
+            set { birthDate = value; }
+        }
+
+        public int BirthYear
+        {
+            get { return birthDate.Year; }
+            set
+            {
+                if (value < 1900 || value > DateTime.Now.Year)
+                    throw new ArgumentException("Год рождения должен быть в пределах от 1900 до текущего года.");
+                birthDate = new DateTime(value, birthDate.Month, birthDate.Day);
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"Имя: {FirstName}, Фамилия: {LastName}, Дата рождения: {BirthDate.ToShortDateString()}";
+        }
+
+        public virtual string ToShortString()
+        {
+            return $"{FirstName} {LastName}";
+        }
+    }
+    public class Article
+    {
+        public Person Author { get; set; }
+        public string Title { get; set; }
+        public double Rating { get; set; }
+
+        public Article(Person author, string title, double rating)
+        {
+            Author = author;
+            Title = title;
+            Rating = rating;
+        }
+
+        public Article() : this(new Person(), "Название ", 0.0)
+        {
+        }
+
+        public override string ToString()
+        {
+            return $"Автор: {Author.ToShortString()}, Название: {Title}, Рейтинг: {Rating}";
+        }
+    }
 }
