@@ -1,44 +1,105 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
+using System.Xml.Linq;
 
 namespace TeamProject
 {
     enum Frequency { Weekly, Monthly, Yearly }
-    internal class Magazine
+
+    interface IRateAndCopy
     {
-        private string name;
-        private Frequency frequency;
-        private DateTime date;
-        private int TirazhNum;
-        private Article[] articles;
+        double Rating { get; }
+        object DeepCopy();
+    }
 
-        public Magazine(string name, Frequency frequency, DateTime date, int TirazhNum)
+
+    public class Edition
+    {
+        protected string Name;
+        protected DateTime Data;
+        protected int Copies;
+
+        public Edition(string name, DateTime data, int copies)
         {
-            this.name = name;
-            this.frequency = frequency;
-            this.date = date;
-            this.TirazhNum = TirazhNum;
-            articles = new Article[0];
+            Name = name;
+            Data = data;
+            Copies = copies;
         }
 
-        public Magazine()
+        public Edition() : this("Название", DateTime.Now, 1000) { }
+
+        public string EditName
         {
-            name = "Magazine";
-            frequency = Frequency.Monthly;
-            date = DateTime.Now;
-            TirazhNum = 1000;
-            articles = new Article[0];
+            get => Name;
+            set => Name = value;
         }
 
-        public string Name
+        public DateTime Date
         {
-            get => name;
+            get => Data;
+            set => Data = value;
+        }
+
+        public int Tirazh
+        {
+            get => Copies;
             set
             {
-                name = value;
+                if (value < 0)
+                    throw new ArgumentException("Номер тиража не может быть отрицательным");
+                Copies = value;
             }
         }
+
+        public virtual object DeepCopy()
+        {
+            return MemberwiseClone();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Edition other)
+            {
+                return Name == other.Name && Data == other.Data && Copies == other.Copies;
+            }
+            return false;
+        }
+
+        public static bool operator ==(Edition e1, Edition e2)
+        {
+            if (ReferenceEquals(e1, null)) return ReferenceEquals(e2, null);
+            return e1.Equals(e2);
+        }
+
+        public static bool operator !=(Edition e1, Edition e2) => !(e1 == e2);
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Data, Copies);
+        }
+
+        public override string ToString()
+        {
+            return $"Название: {Name}, дата выхода: {Data}, тираж: {Copies}";
+        }
+    }
+    internal class Magazine: Edition, IRateAndCopy
+    {
+        private Frequency frequency;
+        public double Rating { get; set; }
+        private ArrayList editors = new ArrayList();
+        private ArrayList articles = new ArrayList();
+
+        public Magazine(string name, Frequency frequency, DateTime date, int TirazhNum)
+            :base(name, date, TirazhNum)
+        {
+            this.frequency = frequency;
+        }
+
+        public Magazine() : base() { }
 
         public Frequency Frequency
         {
@@ -49,33 +110,12 @@ namespace TeamProject
             }
         }
 
-        public DateTime Date
-        {
-            get => date;
-            set =>  date = value;
-        }
-
-        public int Num
-        {
-            get => TirazhNum;
-            set
-            {
-                TirazhNum = value;
-            }
-        }
-
-        public Article[] Articles
-        {
-            get => articles;
-            set
-            {
-                articles = value;
-            }
-        }
+        public ArrayList Editors => editors;
+        public ArrayList Articles => articles;
 
         public double AverageRating
         {
-            get => articles.Length == 0 ? 0.0 : articles.Average(article => article.Rating);
+            get => articles.Count == 0 ? 0.0 : articles.Cast<Article>().Average(a => a.Rating);
         }
 
         public bool this[Frequency frequency]
@@ -83,19 +123,20 @@ namespace TeamProject
             get => this.frequency == frequency;
         }
 
-        public Article[] Add(params Article[] art)
+        public void AddArticles(params Article[] art)
         {
-            Article[] arr = new Article[articles.Length + art.Length];
-            for (int i = 0; i < articles.Length; i++)
+            foreach (var article in art)
             {
-                arr[i] = articles[i];
+                articles.Add(article);
             }
-            for (int i = articles.Length; i < articles.Length+art.Length; i++)
+        }
+
+        public void AddEditors(params Person[] eds)
+        {
+            foreach (var editor in eds)
             {
-                arr[i] = art[i];
+                editors.Add(editor);
             }
-            articles = arr;
-            return articles;
         }
 
         private string Out()
@@ -110,12 +151,44 @@ namespace TeamProject
 
         public override string ToString()
         {
-            return $"Название-{name}, периодичность выхода журнала-{frequency}, дата выхода-{date}, номер тиража-{TirazhNum}, список статей-{Out()}";//
+            return $"Название-{Name}, периодичность выхода журнала-{frequency}, дата выхода-{Data}, номер тиража-{Tirazh}, список статей-{Out()}";
         }
 
         public virtual string ToShortString()
         {
-            return $"Название-{name}, периодичность выхода журнала-{frequency}, дата выхода-{date}, номер тиража-{TirazhNum}, значение среднего рейтинга статей-{AverageRating}";
+            return $"Название-{Name}, периодичность выхода журнала-{frequency}, дата выхода-{Data}, номер тиража-{Tirazh}, значение среднего рейтинга статей-{AverageRating}";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Magazine other)
+            {
+                return Name == other.Name && frequency == other.frequency && Data == other.Data && Tirazh == other.Tirazh && articles.SequenceEqual(other.articles);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            
+        }
+
+        public static bool operator ==(Magazine m1, Magazine m2)
+        {
+            if (ReferenceEquals(m1, null)) return ReferenceEquals(m2, null);
+            return m1.Equals(m2);
+        }
+
+        public static bool operator !=(Magazine m1, Magazine m2) => !(m1 == m2);
+
+        public override object DeepCopy()
+        {
+            var copy = new Magazine(Name, frequency, Data, Copies)
+            {
+                editors = new ArrayList(editors.Cast<Person>().Select(e => e.DeepCopy()).ToArray()),
+                articles = new ArrayList(articles.Cast<Article>().Select(a => a.DeepCopy()).ToArray())
+            };
+            return copy;
         }
     }
     public class Person
@@ -174,7 +247,7 @@ namespace TeamProject
             return $"{FirstName} {LastName}";
         }
     }
-    public class Article
+    public class Article: IRateAndCopy
     {
         public Person Author { get; set; }
         public string Title { get; set; }
@@ -195,6 +268,31 @@ namespace TeamProject
         {
             return $"Автор: {Author.ToShortString()}, Название: {Title}, Рейтинг: {Rating}";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Article other)
+            {
+                return Author == other.Author && Title == other.Title && Rating == other.Rating;
+            }
+            return false;
+        }
+
+        public static bool operator ==(Article a1, Article a2)
+        {
+            if (ReferenceEquals(a1, null)) return ReferenceEquals(a2, null);
+            return a1.Equals(a2);
+        }
+
+        public static bool operator !=(Article a1, Article a2) 
+        {
+            return !(a1 == a2);
+        }
+
+        public virtual object DeepCopy()
+        {
+            return new Article(Author.DeepCopy() as Person, string.Copy(Title), Rating);
+        }
     }
     class Program { 
         static void Main()
@@ -209,7 +307,7 @@ namespace TeamProject
             Magazine magazine1 = new Magazine("magaz", Frequency.Weekly, DateTime.Now, 5000);
             Magazine magazine2 = new Magazine();
 
-            magazine1.Add(article1, article2);
+            magazine1.AddArticles(article1, article2);
 
             Console.WriteLine(magazine1);
             Console.WriteLine();
@@ -264,8 +362,6 @@ namespace TeamProject
                 }
             }
 
-
-            // Измерение времени доступа к элементам одномерного массива
             int start = Environment.TickCount;
             for (int i = 0; i < n; i++)
             {
@@ -274,8 +370,6 @@ namespace TeamProject
             int duration = Environment.TickCount - start; 
             Console.WriteLine($"Одномерный массив: {duration} мс");
 
-
-            // Измерение времени доступа к элементам двумерного прямоугольного массива
             start = Environment.TickCount;
             for (int i = 0; i < n; i++)
             {
@@ -287,8 +381,6 @@ namespace TeamProject
             duration = Environment.TickCount - start;
             Console.WriteLine($"Двумерный прямоугольный массив: {duration} мс");
 
-
-            // Измерение времени доступа к элементам двумерного ступенчатого массива
             start = Environment.TickCount;
             for (int i = 0; i < n; i++)
             {
